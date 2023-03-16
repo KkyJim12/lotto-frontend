@@ -1,6 +1,9 @@
 <template>
   <div class="h-full bg-white bg-opacity-70 rounded">
-    <div v-if="!account" class="flex items-center justify-center h-full">
+    <div
+      v-if="!activeAccount.address"
+      class="flex items-center justify-center h-full"
+    >
       <button
         @click="connectToMetamask()"
         class="text-white shadow-md rounded bg-red-500 px-4 py-2 hover:bg-red-600"
@@ -9,13 +12,31 @@
         Connect to Metamask
       </button>
     </div>
+    <div
+      v-else-if="activeAccount.network !== 5"
+      class="flex items-center justify-center h-full"
+    >
+      <button
+        @click="switchNetwork()"
+        class="text-white shadow-md rounded bg-yellow-500 px-4 py-2 hover:bg-yellow-600"
+        type="button"
+      >
+        Wrong network !! Switch network to goerli
+      </button>
+    </div>
     <div v-else class="flex flex-col justify-between p-10 h-full">
       <div class="flex flex-col space-y-4">
         <h1 class="font-bold text-2xl">Account Detail</h1>
         <div class="space-y-2">
-          <p>Address:</p>
-          <p>Balance:</p>
-          <p>Network:</p>
+          <p>Address: {{ activeAccount.address }}</p>
+          <p>
+            Balance:
+            {{ web3.utils.fromWei(activeAccount.balance, 'ether') }} eth
+          </p>
+          <p>
+            Network:
+            {{ activeAccount.network === 5 ? 'Goerli' : 'Wrong network' }}
+          </p>
         </div>
       </div>
       <div class="flex flex-col space-y-4">
@@ -66,6 +87,7 @@
 </template>
 
 <script>
+const Web3 = require('web3')
 export default {
   data() {
     return {
@@ -92,19 +114,40 @@ export default {
         { id: 6, label: 6 },
       ],
       web3: null,
-      account: null,
+      accounts: [],
+      activeAccount: {
+        address: null,
+        balance: null,
+        network: null,
+      },
     }
   },
   methods: {
     async connectToMetamask() {
       if (window.ethereum) {
-        const accounts = await window.ethereum.request({
+        this.accounts = await window.ethereum.request({
           method: 'eth_requestAccounts',
         })
-        this.web3 = window.ethereum
-        this.account = accounts[0]
+        this.web3 = new Web3(window.ethereum)
+        this.activeAccount = {
+          address: await this.web3.utils.toChecksumAddress(this.accounts[0]),
+          balance: await this.web3.eth.getBalance(this.accounts[0]),
+          network: await this.web3.eth.net.getId(),
+        }
       } else {
         alert('You must install metamask first.')
+      }
+    },
+    async switchNetwork() {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: Web3.utils.toHex(5) }],
+      })
+
+      this.activeAccount = {
+        address: await this.web3.utils.toChecksumAddress(this.accounts[0]),
+        balance: await this.web3.eth.getBalance(this.accounts[0]),
+        network: await this.web3.eth.net.getId(),
       }
     },
   },
