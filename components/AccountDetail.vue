@@ -31,7 +31,7 @@
           />
         </div>
         <button
-          class="text-white bg-green-500 hover:bg-green-600 py-2 rounded"
+          class="text-white bg-red-500 hover:bg-red-600 py-2 rounded"
           type="button"
         >
           Purchase !!
@@ -41,7 +41,7 @@
       <div class="flex flex-col space-y-4">
         <h1 class="font-bold text-2xl">Purchase History</h1>
         <div
-          class="flex flex-col space-y-2 h-60 bg-sky-500 rounded overflow-y-auto p-4"
+          class="flex flex-col space-y-2 h-60 bg-blue-500 rounded overflow-y-auto p-4"
         >
           <table class="table-fixed">
             <thead>
@@ -110,3 +110,27 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+/* ===== Scrollbar CSS ===== */
+/* Firefox */
+* {
+  scrollbar-width: auto;
+  scrollbar-color: #c8c4ca #ffffff;
+}
+
+/* Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 16px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #ffffff;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #c8c4ca;
+  border-radius: 10px;
+  border: 3px solid #ffffff;
+}
+</style>

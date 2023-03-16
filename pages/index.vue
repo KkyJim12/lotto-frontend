@@ -5,7 +5,7 @@
         <AccountDetail />
       </div>
       <div class="col-span-8">
-        <div class="h-full bg-white bg-opacity-70 rounded"></div>
+        <LottoResult />
       </div>
     </div>
   </div>
