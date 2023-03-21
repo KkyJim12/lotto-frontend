@@ -36,34 +36,49 @@
             <div class="grid grid-cols-6 gap-y-4 gap-x-2">
                 <div class="col-span-6">
                     <div class="flex justify-between">
-                        <h1 class="font-bold text-2xl">Buy Lottery</h1>
+                        <h1 class="font-bold text-2xl">Buy Lottery ({{ purchaseLotteries.length }}/3)</h1>
                         <div class="flex space-x-2">
                             <button
+                                @click="addLottery()"
                                 class="w-10 h-10 rounded bg-green-500 hover:bg-green-600 text-2xl text-white shadow-md"
+                                :class="purchaseLotteries.length >= 3 ? 'cursor-not-allowed' : ''"
                                 type="button"
+                                :disabled="purchaseLotteries.length >= 3"
                             >
                                 +
                             </button>
 
                             <button
+                                @click="removeLottery()"
                                 class="w-10 h-10 rounded bg-red-500 hover:bg-red-600 text-2xl text-white shadow-md"
+                                :class="purchaseLotteries.length == 1 ? 'cursor-not-allowed' : ''"
                                 type="button"
+                                :disabled="purchaseLotteries.length == 1"
                             >
                                 -
                             </button>
                         </div>
                     </div>
                 </div>
-                <div v-for="number in numbers" :key="id" class="col-span-1">
-                    <input
-                        class="w-full h-12 rounded text-center focus:outline-sky-500"
-                        type="text"
-                        :placeholder="number.label"
-                        maxlength="1"
-                    />
+                <div class="col-span-6">
+                    <div v-for="purchaseLottery in purchaseLotteries" class="flex flex-col mb-2">
+                        <div class="grid grid-cols-6 gap-x-2">
+                            <div v-for="number in numbers" :key="id" class="col-span-1">
+                                <input
+                                    class="w-full h-12 rounded text-center focus:outline-sky-500"
+                                    type="text"
+                                    :placeholder="number.label"
+                                    maxlength="1"
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="col-span-6">
-                    <button class="text-white bg-yellow-500 hover:bg-yellow-600 py-2 rounded w-full shadow-md" type="button">
+                    <button
+                        class="text-white bg-yellow-500 hover:bg-yellow-600 py-2 rounded w-full shadow-md"
+                        type="button"
+                    >
                         Purchase !!
                     </button>
                 </div>
@@ -99,6 +114,7 @@ const Web3 = require('web3');
 export default {
     data() {
         return {
+            purchaseLotteries: [{ first: null, second: null, third: null, fourth: null, fifth: null, sixth: null }],
             histories: [
                 { rounds: 1, tickets: 3, wins: 2 },
                 { rounds: 2, tickets: 3, wins: 2 },
@@ -131,6 +147,23 @@ export default {
         };
     },
     methods: {
+        addLottery() {
+            if (this.purchaseLotteries.length < 3) {
+                this.purchaseLotteries.push({
+                    first: null,
+                    second: null,
+                    third: null,
+                    fourth: null,
+                    fifth: null,
+                    sixth: null,
+                });
+            }
+        },
+        removeLottery() {
+            if (this.purchaseLotteries.length > 1) {
+                this.purchaseLotteries.pop();
+            }
+        },
         async connectToMetamask() {
             if (window.ethereum) {
                 this.accounts = await window.ethereum.request({
