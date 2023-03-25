@@ -36,14 +36,14 @@
             <div class="grid grid-cols-6 gap-y-4 gap-x-2">
                 <div class="col-span-6">
                     <div class="flex justify-between">
-                        <h1 class="font-bold text-2xl">Buy Lottery ({{ purchaseLotteries.length }}/3)</h1>
+                        <h1 class="font-bold text-2xl">Buy Lottery ({{ purchasedLotteries.length }}/3)</h1>
                         <div class="flex space-x-2">
                             <button
                                 @click="addLottery()"
                                 class="w-10 h-10 rounded bg-green-500 hover:bg-green-600 text-2xl text-white shadow-md"
-                                :class="purchaseLotteries.length >= 3 ? 'cursor-not-allowed' : ''"
+                                :class="purchasedLotteries.length >= 3 ? 'cursor-not-allowed' : ''"
                                 type="button"
-                                :disabled="purchaseLotteries.length >= 3"
+                                :disabled="purchasedLotteries.length >= 3"
                             >
                                 +
                             </button>
@@ -51,9 +51,9 @@
                             <button
                                 @click="removeLottery()"
                                 class="w-10 h-10 rounded bg-red-500 hover:bg-red-600 text-2xl text-white shadow-md"
-                                :class="purchaseLotteries.length == 1 ? 'cursor-not-allowed' : ''"
+                                :class="purchasedLotteries.length == 1 ? 'cursor-not-allowed' : ''"
                                 type="button"
-                                :disabled="purchaseLotteries.length == 1"
+                                :disabled="purchasedLotteries.length == 1"
                             >
                                 -
                             </button>
@@ -61,13 +61,14 @@
                     </div>
                 </div>
                 <div class="col-span-6">
-                    <div v-for="purchaseLottery in purchaseLotteries" class="flex flex-col mb-2">
+                    <div v-for="(purchaseLottery, index) in purchasedLotteries" class="flex flex-col mb-2">
                         <div class="grid grid-cols-6 gap-x-2">
-                            <div v-for="number in numbers" :key="id" class="col-span-1">
+                            <div v-for="number in numbers" :key="number.id" class="col-span-1">
                                 <input
+                                    @input="updateInputValue($event, index, number.label)"
                                     class="w-full h-12 rounded text-center focus:outline-sky-500"
                                     type="text"
-                                    :placeholder="number.label"
+                                    :placeholder="number.value"
                                     maxlength="1"
                                 />
                             </div>
@@ -76,6 +77,7 @@
                 </div>
                 <div class="col-span-6">
                     <button
+                        @click="purchase()"
                         class="text-white bg-yellow-500 hover:bg-yellow-600 py-2 rounded w-full shadow-md"
                         type="button"
                     >
@@ -96,7 +98,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="history in histories" :key="index">
+                            <tr v-for="history in histories" :key="history.rounds">
                                 <td class="text-white text-center">{{ history.rounds }}</td>
                                 <td class="text-white text-center">{{ history.tickets }}</td>
                                 <td class="text-white text-center">{{ history.wins }}</td>
@@ -114,7 +116,7 @@ const Web3 = require('web3');
 export default {
     data() {
         return {
-            purchaseLotteries: [{ first: null, second: null, third: null, fourth: null, fifth: null, sixth: null }],
+            purchasedLotteries: [{ first: null, second: null, third: null, fourth: null, fifth: null, sixth: null }],
             histories: [
                 { rounds: 1, tickets: 3, wins: 2 },
                 { rounds: 2, tickets: 3, wins: 2 },
@@ -130,12 +132,12 @@ export default {
                 { rounds: 12, tickets: 3, wins: 2 },
             ],
             numbers: [
-                { id: 1, label: 1 },
-                { id: 2, label: 2 },
-                { id: 3, label: 3 },
-                { id: 4, label: 4 },
-                { id: 5, label: 5 },
-                { id: 6, label: 6 },
+                { id: 1, value: 1, label: 'first' },
+                { id: 2, value: 2, label: 'second' },
+                { id: 3, value: 3, label: 'third' },
+                { id: 4, value: 4, label: 'fourth' },
+                { id: 5, value: 5, label: 'fifth' },
+                { id: 6, value: 6, label: 'sixth' },
             ],
             web3: null,
             accounts: [],
@@ -148,8 +150,8 @@ export default {
     },
     methods: {
         addLottery() {
-            if (this.purchaseLotteries.length < 3) {
-                this.purchaseLotteries.push({
+            if (this.purchasedLotteries.length < 3) {
+                this.purchasedLotteries.push({
                     first: null,
                     second: null,
                     third: null,
@@ -160,8 +162,8 @@ export default {
             }
         },
         removeLottery() {
-            if (this.purchaseLotteries.length > 1) {
-                this.purchaseLotteries.pop();
+            if (this.purchasedLotteries.length > 1) {
+                this.purchasedLotteries.pop();
             }
         },
         async connectToMetamask() {
@@ -191,30 +193,23 @@ export default {
                 network: await this.web3.eth.net.getId(),
             };
         },
+        updateInputValue(e, index, label) {
+            console.log(e.target.value, index, label);
+            this.purchasedLotteries[index][label] = e.target.value;
+            console.log(this.purchasedLotteries);
+        },
+        purchase() {
+            const items = this.purchasedLotteries;
+
+            const lotteries = [];
+
+            items.map((item) => {
+                const thisLottery = `${item.first}${item.second}${item.third}${item.fourth}${item.fifth}${item.sixth}`;
+                lotteries.push(thisLottery);
+            });
+
+            console.log(lotteries);
+        },
     },
 };
 </script>
-
-<style scoped>
-/* ===== Scrollbar CSS ===== */
-/* Firefox */
-* {
-    scrollbar-width: auto;
-    scrollbar-color: #c8c4ca #ffffff;
-}
-
-/* Chrome, Edge, and Safari */
-*::-webkit-scrollbar {
-    width: 16px;
-}
-
-*::-webkit-scrollbar-track {
-    background: #ffffff;
-}
-
-*::-webkit-scrollbar-thumb {
-    background-color: #c8c4ca;
-    border-radius: 10px;
-    border: 3px solid #ffffff;
-}
-</style>

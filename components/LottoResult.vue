@@ -4,7 +4,7 @@
             <div class="col-span-6">
                 <h1 class="font-bold text-2xl">Round 200</h1>
             </div>
-            <div v-for="result in results" :key="index" class="col-span-1">
+            <div v-for="result in results" class="col-span-1">
                 <div class="rounded bg-blue-500 w-full h-20 flex items-center justify-center">
                     <p class="font-bold text-white text-4xl">{{ result.value }}</p>
                 </div>
@@ -36,7 +36,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="history in histories" :key="index">
+                        <tr v-for="history in histories">
                             <td class="text-white text-center">{{ history.rounds }}</td>
                             <td class="text-white text-center">{{ history.tickets }}</td>
                             <td class="text-white text-center">{{ history.wins }}</td>
@@ -51,6 +51,20 @@
 export default {
     data() {
         return {
+            histories: [
+                { rounds: 1, tickets: 3, wins: 2 },
+                { rounds: 2, tickets: 3, wins: 2 },
+                { rounds: 3, tickets: 3, wins: 2 },
+                { rounds: 4, tickets: 3, wins: 2 },
+                { rounds: 5, tickets: 3, wins: 2 },
+                { rounds: 6, tickets: 3, wins: 2 },
+                { rounds: 7, tickets: 3, wins: 2 },
+                { rounds: 8, tickets: 3, wins: 2 },
+                { rounds: 9, tickets: 3, wins: 2 },
+                { rounds: 10, tickets: 3, wins: 2 },
+                { rounds: 11, tickets: 3, wins: 2 },
+                { rounds: 12, tickets: 3, wins: 2 },
+            ],
             prizes: [
                 {
                     label: '1 match',
