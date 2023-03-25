@@ -112,6 +112,7 @@
 </template>
 
 <script>
+import { abi } from '~/static/abi.json';
 const Web3 = require('web3');
 export default {
     data() {
@@ -140,6 +141,7 @@ export default {
                 { id: 6, value: 6, label: 'sixth' },
             ],
             web3: null,
+            contractAddress: '0x85980f03D355A8cC24a568F2d6FBEa000dd021Fc',
             accounts: [],
             activeAccount: {
                 address: null,
@@ -194,21 +196,32 @@ export default {
             };
         },
         updateInputValue(e, index, label) {
-            console.log(e.target.value, index, label);
             this.purchasedLotteries[index][label] = e.target.value;
-            console.log(this.purchasedLotteries);
         },
-        purchase() {
-            const items = this.purchasedLotteries;
+        async purchase() {
+            try {
+                const items = this.purchasedLotteries;
 
-            const lotteries = [];
+                const lotteries = [];
 
-            items.map((item) => {
-                const thisLottery = `${item.first}${item.second}${item.third}${item.fourth}${item.fifth}${item.sixth}`;
-                lotteries.push(thisLottery);
-            });
+                items.map((item) => {
+                    const thisLottery = `${item.first}${item.second}${item.third}${item.fourth}${item.fifth}${item.sixth}`;
+                    lotteries.push(thisLottery);
+                });
 
-            console.log(lotteries);
+                console.log(lotteries);
+
+                const contract = await new this.web3.eth.Contract(abi, this.contractAddress);
+                const response = await contract.methods.purchase(lotteries).send({
+                    from: this.activeAccount.address,
+                    to: this.contractAddress,
+                    value: 1000,
+                });
+
+                console.log(response);
+            } catch (error) {
+                console.log(error);
+            }
         },
     },
 };
