@@ -115,6 +115,11 @@
 import { abi } from '~/static/abi.json';
 const Web3 = require('web3');
 export default {
+    mounted() {
+        if (this.activeAccount.address) {
+            this.getPurchaseHistory();
+        }
+    },
     data() {
         return {
             purchasedLotteries: [{ first: null, second: null, third: null, fourth: null, fifth: null, sixth: null }],
@@ -141,7 +146,7 @@ export default {
                 { id: 6, value: 6, label: 'sixth' },
             ],
             web3: null,
-            contractAddress: '0x85980f03D355A8cC24a568F2d6FBEa000dd021Fc',
+            contractAddress: '0x74555fdda96471e335597c1e636ec46bc63f0fd8',
             accounts: [],
             activeAccount: {
                 address: null,
@@ -179,6 +184,8 @@ export default {
                     balance: await this.web3.eth.getBalance(this.accounts[0]),
                     network: await this.web3.eth.net.getId(),
                 };
+
+                this.getPurchaseHistory();
             } else {
                 alert('You must install metamask first.');
             }
@@ -198,6 +205,17 @@ export default {
         updateInputValue(e, index, label) {
             this.purchasedLotteries[index][label] = e.target.value;
         },
+        async getPurchaseHistory() {
+            try {
+                const contract = await new this.web3.eth.Contract(abi, this.contractAddress, {
+                    from: this.activeAccount.address,
+                });
+                const response = await contract.methods.showAllMyHistories().call();
+                console.log(response, 'All Histories');
+            } catch (error) {
+                console.log(error);
+            }
+        },
         async purchase() {
             try {
                 const items = this.purchasedLotteries;
@@ -209,16 +227,13 @@ export default {
                     lotteries.push(thisLottery);
                 });
 
-                console.log(lotteries);
-
                 const contract = await new this.web3.eth.Contract(abi, this.contractAddress);
+                console.log(lotteries);
                 const response = await contract.methods.purchase(lotteries).send({
                     from: this.activeAccount.address,
                     to: this.contractAddress,
                     value: 1000,
                 });
-
-                console.log(response);
             } catch (error) {
                 console.log(error);
             }
