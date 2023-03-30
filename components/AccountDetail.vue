@@ -87,21 +87,21 @@
             </div>
 
             <div class="flex flex-col space-y-4">
-                <h1 class="font-bold text-2xl">Purchase History</h1>
+                <h1 class="font-bold text-2xl">
+                    Purchase History in round {{ this.round }} ({{
+                        this.histories.lotteriesCount ? this.histories.lotteriesCount : '0'
+                    }})
+                </h1>
                 <div class="flex flex-col space-y-2 h-60 bg-blue-500 rounded overflow-y-auto p-4">
                     <table class="table-fixed">
                         <thead>
                             <tr>
-                                <th class="text-white">Rounds</th>
-                                <th class="text-white">Tickets</th>
-                                <th class="text-white">Wins</th>
+                                <th class="text-white">Number</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="history in histories" :key="history.rounds">
-                                <td class="text-white text-center">{{ history.rounds }}</td>
-                                <td class="text-white text-center">{{ history.tickets }}</td>
-                                <td class="text-white text-center">{{ history.wins }}</td>
+                            <tr v-for="history in histories.lotteries">
+                                <td class="text-white text-center">{{ history }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -115,13 +115,12 @@
 import { abi } from '~/static/abi.json';
 const Web3 = require('web3');
 export default {
-    mounted() {
-        if (this.activeAccount.address) {
-            this.getPurchaseHistory();
-        }
+    async mounted() {
+        await this.connectToMetamask();
     },
     data() {
         return {
+            round: null,
             purchasedLotteries: [{ first: null, second: null, third: null, fourth: null, fifth: null, sixth: null }],
             histories: [
                 { rounds: 1, tickets: 3, wins: 2 },
@@ -185,7 +184,8 @@ export default {
                     network: await this.web3.eth.net.getId(),
                 };
 
-                this.getPurchaseHistory();
+                await this.getThisRound();
+                await this.getPurchaseHistory();
             } else {
                 alert('You must install metamask first.');
             }
@@ -205,13 +205,24 @@ export default {
         updateInputValue(e, index, label) {
             this.purchasedLotteries[index][label] = e.target.value;
         },
+        async getThisRound() {
+            try {
+                const contract = await new this.web3.eth.Contract(abi, this.contractAddress);
+                const response = await contract.methods.round().call();
+                console.log(response);
+                this.round = response;
+            } catch (error) {
+                console.log(error);
+            }
+        },
         async getPurchaseHistory() {
             try {
                 const contract = await new this.web3.eth.Contract(abi, this.contractAddress, {
                     from: this.activeAccount.address,
                 });
-                const response = await contract.methods.showAllMyHistories().call();
-                console.log(response, 'All Histories');
+                const response = await contract.methods.showMyHistoryInThisRound(this.round).call();
+                this.histories = response;
+                console.log(this.histories);
             } catch (error) {
                 console.log(error);
             }
